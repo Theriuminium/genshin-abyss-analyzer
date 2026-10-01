@@ -14,7 +14,7 @@
             <p class="text-gray-400">Build your team and check your stat requirements.</p>
         </div>
 
-        <!-- NEW: Team Builder Slots -->
+        <!-- Team Builder Slots -->
         <div class="mb-8 bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-lg">
             <h2 class="text-xl font-bold text-white mb-4 text-center">Your Spiral Abyss Team</h2>
             <div id="teamSlots" class="flex justify-center gap-4">
@@ -60,33 +60,27 @@
 
     <script>
         const database = [
-            // PYRO
             { id: "xiangling", name: "Xiangling", element: "Pyro", roles: ["Sub-DPS"], stat_benchmarks: { target_er: 200, priority_stat: "Energy Recharge" }, abyss_tips: "Needs Bennett to snapshot his ATK buff." },
             { id: "bennett", name: "Bennett", element: "Pyro", roles: ["Healer", "ATK Buffer"], stat_benchmarks: { target_er: 220, priority_stat: "Base ATK & ER" }, abyss_tips: "Do not build ATK% on artifacts." },
             { id: "gaming", name: "Gaming", element: "Pyro", roles: ["Main DPS"], stat_benchmarks: { target_er: 130, priority_stat: "CRIT & EM" }, abyss_tips: "Pair him with Bennett and Xingqiu." },
             { id: "chevreuse", name: "Chevreuse", element: "Pyro", roles: ["Overload Buffer"], stat_benchmarks: { target_er: 160, priority_stat: "Max HP (Target: 40k)" }, abyss_tips: "Must ONLY run with Pyro and Electro." },
             { id: "thoma", name: "Thoma", element: "Pyro", roles: ["Burgeon Trigger"], stat_benchmarks: { target_er: 220, priority_stat: "ER & EM" }, abyss_tips: "Ignore shield, build pure EM/ER for Burgeon." },
-            // HYDRO
             { id: "xingqiu", name: "Xingqiu", element: "Hydro", roles: ["Sub-DPS"], stat_benchmarks: { target_er: 180, priority_stat: "ER (Sacrificial Sword)" }, abyss_tips: "The absolute gold standard for Hydro application." },
             { id: "barbara", name: "Barbara", element: "Hydro", roles: ["Healer"], stat_benchmarks: { target_er: 140, priority_stat: "Max HP" }, abyss_tips: "Great for holding TTDS catalyst." },
-            // ELECTRO
             { id: "kuki_shinobu", name: "Kuki Shinobu", element: "Electro", roles: ["Hyperbloom"], stat_benchmarks: { target_er: 0, priority_stat: "EM (Level 90)" }, abyss_tips: "Focus purely on hitting 800+ EM." },
             { id: "fischl", name: "Fischl", element: "Electro", roles: ["Off-Field DPS"], stat_benchmarks: { target_er: 120, priority_stat: "CRIT Ratio & ATK%" }, abyss_tips: "Oz snapshots buffs just like Xiangling." },
             { id: "beidou", name: "Beidou", element: "Electro", roles: ["Off-Field AoE"], stat_benchmarks: { target_er: 160, priority_stat: "Energy Recharge" }, abyss_tips: "An absolute monster against 2 or 3 targets." },
-            // ANEMO
             { id: "sucrose", name: "Sucrose", element: "Anemo", roles: ["EM Buffer", "VV"], stat_benchmarks: { target_er: 160, priority_stat: "EM & ER" }, abyss_tips: "Equip 4pc Viridescent Venerer." },
             { id: "faruzan", name: "Faruzan", element: "Anemo", roles: ["Anemo Buffer"], stat_benchmarks: { target_er: 250, priority_stat: "Energy Recharge" }, abyss_tips: "Needs insane ER before Constellation 6." },
             { id: "lynette", name: "Lynette", element: "Anemo", roles: ["Ousia Enabler"], stat_benchmarks: { target_er: 200, priority_stat: "Energy Recharge" }, abyss_tips: "Great F2P taunt and mobility." },
-            // DENDRO
             { id: "dendro_traveler", name: "Traveler", element: "Dendro", roles: ["Dendro Enabler"], stat_benchmarks: { target_er: 220, priority_stat: "ER (Favonius)" }, abyss_tips: "Hit burst with Hydro/Electro first, NEVER Pyro." },
             { id: "yaoyao", name: "Yaoyao", element: "Dendro", roles: ["Healer"], stat_benchmarks: { target_er: 180, priority_stat: "ER & HP%" }, abyss_tips: "Sprint across the floor during burst to heal team." },
             { id: "collei", name: "Collei", element: "Dendro", roles: ["Dendro App"], stat_benchmarks: { target_er: 180, priority_stat: "Energy Recharge" }, abyss_tips: "Perfect for quick-swap teams." },
-            // CRYO
             { id: "rosaria", name: "Rosaria", element: "Cryo", roles: ["CRIT Buffer"], stat_benchmarks: { target_er: 150, priority_stat: "CRIT Rate" }, abyss_tips: "Shares her CRIT Rate with the team." },
             { id: "diona", name: "Diona", element: "Cryo", roles: ["Shielder", "Battery"], stat_benchmarks: { target_er: 180, priority_stat: "HP% & ER" }, abyss_tips: "Hold skill for stronger shield. Sacrificial Bow is best." }
         ];
 
-        let currentTeam = []; // Array to hold up to 4 characters
+        let currentTeam = []; 
 
         const grid = document.getElementById('characterGrid');
         const teamSlotsContainer = document.getElementById('teamSlots');
@@ -119,10 +113,10 @@
         function toggleCharacter(char) {
             const index = currentTeam.findIndex(c => c.id === char.id);
             if (index > -1) {
-                currentTeam.splice(index, 1); // Remove if already in team
+                currentTeam.splice(index, 1); 
             } else {
                 if (currentTeam.length < 4) {
-                    currentTeam.push(char); // Add to team if under 4
+                    currentTeam.push(char); 
                 } else {
                     alert("Your team is full! Remove a character first.");
                 }
@@ -142,7 +136,7 @@
                 if (currentTeam[i]) {
                     slot.innerHTML = `<span class="font-bold text-sm text-white text-center px-1">${currentTeam[i].name}</span>
                                       <span class="text-xs text-yellow-400 mt-1">${currentTeam[i].element}</span>`;
-                    slot.onclick = () => toggleCharacter(currentTeam[i]); // Click slot to remove
+                    slot.onclick = () => toggleCharacter(currentTeam[i]); 
                 } else {
                     slot.innerHTML = `<span class="text-3xl text-gray-600">+</span>`;
                 }
@@ -159,9 +153,16 @@
                     </div>
                 `;
             } else {
-                // Generate the Full Team Report!
                 let reportHTML = `<h2 class="text-2xl font-bold text-white border-b border-gray-700 pb-2 mb-4">Floor 12 Stat Checklist</h2>`;
                 
+                // NEW AI BUTTON
+                reportHTML += `
+                    <button onclick="analyzeTeamWithAI()" class="mb-6 w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition transform hover:-translate-y-0.5">
+                        ✨ Generate AI Strategy
+                    </button>
+                    <div id="aiResponseBox"></div>
+                `;
+
                 currentTeam.forEach(char => {
                     reportHTML += `
                         <div class="mb-4 bg-gray-900 p-3 rounded-lg border border-gray-700">
@@ -173,43 +174,51 @@
                                 🎯 Target ER: <strong class="text-white">${char.stat_benchmarks.target_er > 0 ? char.stat_benchmarks.target_er + '%' : 'N/A'}</strong><br>
                                 💡 Focus: <span class="text-gray-400">${char.stat_benchmarks.priority_stat}</span>
                             </div>
-                            <p class="text-xs text-blue-300 mt-2 italic bg-blue-900/30 p-2 rounded">"${char.abyss_tips}"</p>
                         </div>
                     `;
                 });
 
                 panelContent.innerHTML = reportHTML;
-                // Scroll layout smoothly to panel on mobile
-                if (window.innerWidth < 1024) document.getElementById('analysisPanel').scrollIntoView({behavior: "smooth"});
             }
         }
 
-        // Event Listeners for Search/Filter
+        // NEW AI FUNCTION (Securely inside the script tags)
+        async function analyzeTeamWithAI() {
+            const teamNames = currentTeam.map(char => char.name).join(", ");
+            const aiBox = document.getElementById("aiResponseBox");
+            
+            aiBox.innerHTML = `
+                <div class="mb-6 p-4 bg-gray-900 rounded-xl border border-yellow-400/50 text-center animate-pulse">
+                    <p class="text-yellow-400 font-bold">🧠 AI is analyzing your team synergy...</p>
+                    <p class="text-xs text-gray-400 mt-1">Calling Gemini...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch("/api/analyze", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ teamNames: teamNames })
+                });
+
+                const data = await response.json();
+                
+                aiBox.innerHTML = `
+                    <div class="mb-6 p-5 bg-gray-900 rounded-xl border border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+                        <h3 class="text-lg font-bold text-purple-400 mb-3">✨ AI Strategy Report</h3>
+                        <div class="text-sm text-gray-200 leading-relaxed">${data.result}</div>
+                    </div>
+                `;
+            } catch (error) {
+                aiBox.innerHTML = `<div class="mb-6 p-4 bg-red-900/50 border border-red-500 rounded-xl text-red-400 text-sm font-bold text-center">❌ Failed to connect to AI.<br><span class="font-normal text-xs text-gray-300">Make sure your API key is correct in Vercel!</span></div>`;
+            }
+        }
+
         document.getElementById('searchInput').addEventListener('input', renderGrid);
         document.getElementById('elementFilter').addEventListener('change', renderGrid);
 
-        // Boot
         renderGrid();
         renderTeamSlots();
     </script>
-// Inside your index.html
-async function analyzeTeamWithAI(team) {
-    const teamNames = team.map(char => char.name).join(", ");
-    document.getElementById("panelContent").innerHTML = "Analyzing Synergy...";
-
-    // Notice how we just call '/api/analyze' now!
-    const response = await fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ teamNames: teamNames })
-    });
-
-    const data = await response.json();
-    
-    document.getElementById("panelContent").innerHTML = `
-        <h2 class="text-xl font-bold text-yellow-400 mb-2">Smart Analysis</h2>
-        <div class="text-sm text-gray-200">${data.result}</div>
-    `;
-}
 </body>
 </html>
