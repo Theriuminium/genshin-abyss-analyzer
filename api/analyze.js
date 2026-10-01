@@ -1,20 +1,18 @@
 module.exports = async function(req, res) {
     try {
-        // We are hitting the "/models" endpoint to ask Groq what you are allowed to use
-        const response = await fetch("https://api.groq.com/openai/v1/models", {
-            headers: { "Authorization": `Bearer ${process.env.AI_API_KEY}` }
-        });
+        // We are hitting Google's /models endpoint to see what your key unlocks
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.AI_API_KEY}`);
         
         const data = await response.json();
         
         if (!response.ok) {
-            console.error("🚨 GROQ ERROR:", data);
+            console.error("🚨 GOOGLE ERROR:", data);
             return res.status(500).json({ error: "API Rejected" });
         }
 
-        // Extract the names and print them to the screen
-        const modelList = data.data.map(m => m.id).join("<br>• ");
-        res.status(200).json({ result: "<b>Your Approved Models:</b><br>• " + modelList });
+        // Extract the Google model names and print them to the screen
+        const modelList = data.models.map(m => m.name).join("<br>• ");
+        res.status(200).json({ result: "<b>Your Approved Gemini Models:</b><br>• " + modelList });
 
     } catch (error) {
         console.error("🚨 SERVER CRASH:", error);
