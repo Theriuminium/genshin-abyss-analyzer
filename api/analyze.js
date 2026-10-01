@@ -4,30 +4,36 @@ export default async function handler(req, res) {
     const { teamNames } = req.body;
 
     try {
-        // Using the bulletproof Native Gemini API endpoint
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.AI_API_KEY}`, {
+        // We are using Groq's lightning fast, 100% free endpoint
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${process.env.AI_API_KEY}` 
             },
             body: JSON.stringify({
-                contents: [{
-                    parts: [{
-                        text: `You are a Genshin Impact Spiral Abyss expert. Analyze the team synergy, point out energy issues, and suggest ONE F2P character swap for better performance. Format your response cleanly in HTML. Keep it under 2 paragraphs. Analyze this team: ${teamNames}`
-                    }]
-                }]
+                model: "llama-3.1-8b-instant", 
+                messages: [
+                    { 
+                        role: "system", 
+                        content: "You are a Genshin Spiral Abyss expert. Analyze the team synergy, point out energy issues, and suggest ONE F2P character swap for better performance. Format your response cleanly in HTML. Keep it under 2 paragraphs." 
+                    },
+                    { 
+                        role: "user", 
+                        content: `Analyze this team: ${teamNames}` 
+                    }
+                ]
             })
         });
 
         const data = await response.json();
         
         if (!response.ok) {
-            console.error("🚨 GOOGLE API ERROR:", data);
+            console.error("🚨 GROQ API ERROR:", data);
             return res.status(500).json({ error: "API Rejected" });
         }
 
-        // Native Gemini returns data in a slightly different shape!
-        const aiText = data.candidates[0].content.parts[0].text;
+        const aiText = data.choices[0].message.content;
         res.status(200).json({ result: aiText });
 
     } catch (error) {
