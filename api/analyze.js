@@ -1,10 +1,9 @@
-export default async function handler(req, res) {
+module.exports = async function(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ message: 'Only POST requests allowed' });
     
     const { teamNames } = req.body;
 
     try {
-        // We are using Groq's lightning fast, 100% free endpoint
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
             headers: {
@@ -12,7 +11,7 @@ export default async function handler(req, res) {
                 "Authorization": `Bearer ${process.env.AI_API_KEY}` 
             },
             body: JSON.stringify({
-                model: "model: "llama3-8b-8192", 
+                model: "llama3-8b-8192", 
                 messages: [
                     { 
                         role: "system", 
