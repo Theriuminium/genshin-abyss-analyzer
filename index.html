@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F2P Abyss Analyzer Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 p-4 md:p-8 font-sans">
+    <div class="max-w-6xl mx-auto">
+        
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-yellow-400 mb-2">F2P Abyss Analyzer</h1>
+            <p class="text-gray-400">Build your team and check your stat requirements.</p>
+        </div>
+
+        <!-- NEW: Team Builder Slots -->
+        <div class="mb-8 bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-lg">
+            <h2 class="text-xl font-bold text-white mb-4 text-center">Your Spiral Abyss Team</h2>
+            <div id="teamSlots" class="flex justify-center gap-4">
+                <!-- Slots drawn by JS -->
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left Column: Character Selection -->
+            <div class="lg:col-span-2">
+                <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                    <input type="text" id="searchInput" placeholder="Search character name..." 
+                           class="flex-1 p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-yellow-400 transition text-white">
+                    <select id="elementFilter" class="p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-yellow-400 transition cursor-pointer text-white">
+                        <option value="All">All Elements</option>
+                        <option value="Pyro">Pyro</option>
+                        <option value="Hydro">Hydro</option>
+                        <option value="Anemo">Anemo</option>
+                        <option value="Electro">Electro</option>
+                        <option value="Dendro">Dendro</option>
+                        <option value="Cryo">Cryo</option>
+                    </select>
+                </div>
+
+                <div id="characterGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <!-- Cards -->
+                </div>
+            </div>
+
+            <!-- Right Column: Team Dashboard -->
+            <div class="lg:col-span-1">
+                <div id="analysisPanel" class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-xl sticky top-8">
+                    <div id="panelContent" class="text-center py-12 text-gray-500">
+                        <p class="font-medium text-lg text-gray-400">Team Incomplete</p>
+                        <p class="text-sm mt-1">Select 4 characters to generate your Abyss Readiness Report.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const database = [
+            // PYRO
+            { id: "xiangling", name: "Xiangling", element: "Pyro", roles: ["Sub-DPS"], stat_benchmarks: { target_er: 200, priority_stat: "Energy Recharge" }, abyss_tips: "Needs Bennett to snapshot his ATK buff." },
+            { id: "bennett", name: "Bennett", element: "Pyro", roles: ["Healer", "ATK Buffer"], stat_benchmarks: { target_er: 220, priority_stat: "Base ATK & ER" }, abyss_tips: "Do not build ATK% on artifacts." },
+            { id: "gaming", name: "Gaming", element: "Pyro", roles: ["Main DPS"], stat_benchmarks: { target_er: 130, priority_stat: "CRIT & EM" }, abyss_tips: "Pair him with Bennett and Xingqiu." },
+            { id: "chevreuse", name: "Chevreuse", element: "Pyro", roles: ["Overload Buffer"], stat_benchmarks: { target_er: 160, priority_stat: "Max HP (Target: 40k)" }, abyss_tips: "Must ONLY run with Pyro and Electro." },
+            { id: "thoma", name: "Thoma", element: "Pyro", roles: ["Burgeon Trigger"], stat_benchmarks: { target_er: 220, priority_stat: "ER & EM" }, abyss_tips: "Ignore shield, build pure EM/ER for Burgeon." },
+            // HYDRO
+            { id: "xingqiu", name: "Xingqiu", element: "Hydro", roles: ["Sub-DPS"], stat_benchmarks: { target_er: 180, priority_stat: "ER (Sacrificial Sword)" }, abyss_tips: "The absolute gold standard for Hydro application." },
+            { id: "barbara", name: "Barbara", element: "Hydro", roles: ["Healer"], stat_benchmarks: { target_er: 140, priority_stat: "Max HP" }, abyss_tips: "Great for holding TTDS catalyst." },
+            // ELECTRO
+            { id: "kuki_shinobu", name: "Kuki Shinobu", element: "Electro", roles: ["Hyperbloom"], stat_benchmarks: { target_er: 0, priority_stat: "EM (Level 90)" }, abyss_tips: "Focus purely on hitting 800+ EM." },
+            { id: "fischl", name: "Fischl", element: "Electro", roles: ["Off-Field DPS"], stat_benchmarks: { target_er: 120, priority_stat: "CRIT Ratio & ATK%" }, abyss_tips: "Oz snapshots buffs just like Xiangling." },
+            { id: "beidou", name: "Beidou", element: "Electro", roles: ["Off-Field AoE"], stat_benchmarks: { target_er: 160, priority_stat: "Energy Recharge" }, abyss_tips: "An absolute monster against 2 or 3 targets." },
+            // ANEMO
+            { id: "sucrose", name: "Sucrose", element: "Anemo", roles: ["EM Buffer", "VV"], stat_benchmarks: { target_er: 160, priority_stat: "EM & ER" }, abyss_tips: "Equip 4pc Viridescent Venerer." },
+            { id: "faruzan", name: "Faruzan", element: "Anemo", roles: ["Anemo Buffer"], stat_benchmarks: { target_er: 250, priority_stat: "Energy Recharge" }, abyss_tips: "Needs insane ER before Constellation 6." },
+            { id: "lynette", name: "Lynette", element: "Anemo", roles: ["Ousia Enabler"], stat_benchmarks: { target_er: 200, priority_stat: "Energy Recharge" }, abyss_tips: "Great F2P taunt and mobility." },
+            // DENDRO
+            { id: "dendro_traveler", name: "Traveler", element: "Dendro", roles: ["Dendro Enabler"], stat_benchmarks: { target_er: 220, priority_stat: "ER (Favonius)" }, abyss_tips: "Hit burst with Hydro/Electro first, NEVER Pyro." },
+            { id: "yaoyao", name: "Yaoyao", element: "Dendro", roles: ["Healer"], stat_benchmarks: { target_er: 180, priority_stat: "ER & HP%" }, abyss_tips: "Sprint across the floor during burst to heal team." },
+            { id: "collei", name: "Collei", element: "Dendro", roles: ["Dendro App"], stat_benchmarks: { target_er: 180, priority_stat: "Energy Recharge" }, abyss_tips: "Perfect for quick-swap teams." },
+            // CRYO
+            { id: "rosaria", name: "Rosaria", element: "Cryo", roles: ["CRIT Buffer"], stat_benchmarks: { target_er: 150, priority_stat: "CRIT Rate" }, abyss_tips: "Shares her CRIT Rate with the team." },
+            { id: "diona", name: "Diona", element: "Cryo", roles: ["Shielder", "Battery"], stat_benchmarks: { target_er: 180, priority_stat: "HP% & ER" }, abyss_tips: "Hold skill for stronger shield. Sacrificial Bow is best." }
+        ];
+
+        let currentTeam = []; // Array to hold up to 4 characters
+
+        const grid = document.getElementById('characterGrid');
+        const teamSlotsContainer = document.getElementById('teamSlots');
+        const panelContent = document.getElementById('panelContent');
+
+        function renderGrid() {
+            grid.innerHTML = '';
+            const searchVal = document.getElementById('searchInput').value.toLowerCase();
+            const elementVal = document.getElementById('elementFilter').value;
+
+            database.filter(char => 
+                char.name.toLowerCase().includes(searchVal) && 
+                (elementVal === 'All' || char.element === elementVal)
+            ).forEach(char => {
+                const isSelected = currentTeam.some(c => c.id === char.id);
+                const card = document.createElement('div');
+                
+                card.className = `bg-gray-800 p-4 rounded-xl border transition cursor-pointer text-center shadow-md select-none transform hover:-translate-y-0.5 ${
+                    isSelected ? 'border-yellow-400 bg-gray-700 opacity-50' : 'border-gray-700 hover:border-gray-500'
+                }`;
+                
+                card.innerHTML = `<h3 class="font-bold text-white mb-1">${char.name}</h3>
+                                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-900 text-gray-300">${char.element.toUpperCase()}</span>`;
+                
+                card.onclick = () => toggleCharacter(char);
+                grid.appendChild(card);
+            });
+        }
+
+        function toggleCharacter(char) {
+            const index = currentTeam.findIndex(c => c.id === char.id);
+            if (index > -1) {
+                currentTeam.splice(index, 1); // Remove if already in team
+            } else {
+                if (currentTeam.length < 4) {
+                    currentTeam.push(char); // Add to team if under 4
+                } else {
+                    alert("Your team is full! Remove a character first.");
+                }
+            }
+            renderGrid();
+            renderTeamSlots();
+            updateDashboard();
+        }
+
+        function renderTeamSlots() {
+            teamSlotsContainer.innerHTML = '';
+            for (let i = 0; i < 4; i++) {
+                const slot = document.createElement('div');
+                slot.className = "w-20 h-20 md:w-24 md:h-24 rounded-lg border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition " + 
+                    (currentTeam[i] ? "border-yellow-400 bg-gray-800" : "border-gray-600 hover:border-gray-400");
+                
+                if (currentTeam[i]) {
+                    slot.innerHTML = `<span class="font-bold text-sm text-white text-center px-1">${currentTeam[i].name}</span>
+                                      <span class="text-xs text-yellow-400 mt-1">${currentTeam[i].element}</span>`;
+                    slot.onclick = () => toggleCharacter(currentTeam[i]); // Click slot to remove
+                } else {
+                    slot.innerHTML = `<span class="text-3xl text-gray-600">+</span>`;
+                }
+                teamSlotsContainer.appendChild(slot);
+            }
+        }
+
+        function updateDashboard() {
+            if (currentTeam.length < 4) {
+                panelContent.innerHTML = `
+                    <div class="text-center py-12 text-gray-500">
+                        <p class="font-medium text-xl text-yellow-400">${currentTeam.length} / 4 Selected</p>
+                        <p class="text-sm mt-2 text-gray-400">Pick ${4 - currentTeam.length} more characters to generate your report.</p>
+                    </div>
+                `;
+            } else {
+                // Generate the Full Team Report!
+                let reportHTML = `<h2 class="text-2xl font-bold text-white border-b border-gray-700 pb-2 mb-4">Floor 12 Stat Checklist</h2>`;
+                
+                currentTeam.forEach(char => {
+                    reportHTML += `
+                        <div class="mb-4 bg-gray-900 p-3 rounded-lg border border-gray-700">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-yellow-400">${char.name}</span>
+                                <span class="text-xs bg-gray-700 px-2 py-1 rounded text-white">${char.roles[0]}</span>
+                            </div>
+                            <div class="text-sm text-gray-300">
+                                🎯 Target ER: <strong class="text-white">${char.stat_benchmarks.target_er > 0 ? char.stat_benchmarks.target_er + '%' : 'N/A'}</strong><br>
+                                💡 Focus: <span class="text-gray-400">${char.stat_benchmarks.priority_stat}</span>
+                            </div>
+                            <p class="text-xs text-blue-300 mt-2 italic bg-blue-900/30 p-2 rounded">"${char.abyss_tips}"</p>
+                        </div>
+                    `;
+                });
+
+                panelContent.innerHTML = reportHTML;
+                // Scroll layout smoothly to panel on mobile
+                if (window.innerWidth < 1024) document.getElementById('analysisPanel').scrollIntoView({behavior: "smooth"});
+            }
+        }
+
+        // Event Listeners for Search/Filter
+        document.getElementById('searchInput').addEventListener('input', renderGrid);
+        document.getElementById('elementFilter').addEventListener('change', renderGrid);
+
+        // Boot
+        renderGrid();
+        renderTeamSlots();
+    </script>
+// Inside your index.html
+async function analyzeTeamWithAI(team) {
+    const teamNames = team.map(char => char.name).join(", ");
+    document.getElementById("panelContent").innerHTML = "Analyzing Synergy...";
+
+    // Notice how we just call '/api/analyze' now!
+    const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ teamNames: teamNames })
+    });
+
+    const data = await response.json();
+    
+    document.getElementById("panelContent").innerHTML = `
+        <h2 class="text-xl font-bold text-yellow-400 mb-2">Smart Analysis</h2>
+        <div class="text-sm text-gray-200">${data.result}</div>
+    `;
+}
+</body>
+</html>
